@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Drizzle Craft | Lifesteal Server</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' shape-rendering='crispEdges'><rect width='16' height='16' fill='%23866043'/><rect width='16' height='5' fill='%235d9b3a'/><rect y='5' width='16' height='1' fill='%23437a28'/><rect x='2' y='1' width='2' height='2' fill='%23437a28'/><rect x='9' y='2' width='2' height='2' fill='%23437a28'/><rect x='13' y='0' width='2' height='2' fill='%23437a28'/><rect x='3' y='8' width='2' height='2' fill='%235e4129'/><rect x='10' y='7' width='2' height='2' fill='%235e4129'/><rect x='6' y='11' width='2' height='2' fill='%235e4129'/><rect x='12' y='12' width='2' height='2' fill='%235e4129'/><rect x='1' y='13' width='2' height='2' fill='%235e4129'/></svg>">
+<meta name="description" content="Drizzle Craft is a private Minecraft server played by 4 friends.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#1d1d21; --panel:#2c2c33; --panel2:#24242a; --ink:#f1f1f4; --muted:#b0b0ba;
+  --grass:#5d9b3a; --grass-d:#437a28; --dirt:#866043; --dirt-d:#5e4129;
+  --stone:#4a4a52; --diamond:#4de0d0; --red:#c0392b; --line:#0b0b0d;
+  --head:'Press Start 2P','Courier New',monospace;
+  --body:'VT323','Courier New',monospace;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:72px}
+body{margin:0;background:var(--bg);color:var(--ink);font:22px/1.35 var(--body)}
+h1,h2,h3{font-family:var(--head);font-weight:400;line-height:1.5;margin:0}
+a{color:var(--diamond)}
+:focus-visible{outline:3px solid var(--diamond);outline-offset:3px}
+.wrap{max-width:1040px;margin:0 auto}
+
+/* buttons / boxes */
+.btn{font-family:var(--head);font-size:12px;color:#fff;background:var(--grass);border:4px solid var(--line);padding:14px 18px;cursor:pointer;text-decoration:none;display:inline-block;
+  box-shadow:inset -4px -4px 0 var(--grass-d),inset 4px 4px 0 rgba(255,255,255,.28)}
+.btn:hover{background:#6db048}
+.btn:active{transform:translateY(2px)}
+.btn.gray{background:var(--stone);box-shadow:inset -4px -4px 0 #35353b,inset 4px 4px 0 rgba(255,255,255,.2)}
+.btn.red{background:var(--red);box-shadow:inset -4px -4px 0 #8e2a20,inset 4px 4px 0 rgba(255,255,255,.2)}
+.btn.small{font-size:10px;padding:10px 12px}
+.box{background:var(--panel);border:4px solid var(--line);padding:22px;box-shadow:inset -4px -4px 0 rgba(0,0,0,.25),inset 4px 4px 0 rgba(255,255,255,.07)}
+.box h3{font-size:12px;margin-bottom:10px}
+.box p{margin:0 0 14px;color:var(--muted)}
+
+/* nav */
+.nav{position:sticky;top:0;z-index:50;background:#141417;border-bottom:4px solid var(--line)}
+.nav-in{max-width:1040px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;gap:16px;position:relative}
+.logo{font-family:var(--head);font-size:13px;color:#fff;text-decoration:none;display:flex;align-items:center;gap:10px}
+.logo i{width:22px;height:22px;display:block;border:3px solid #000;background:linear-gradient(var(--grass) 0 40%,var(--dirt) 40%)}
+.menu{display:flex;gap:6px}
+.menu a{font-family:var(--head);font-size:10px;color:#d8d8de;text-decoration:none;padding:12px 14px}
+.menu a:hover{background:var(--stone);color:#fff}
+.burger{display:none;width:46px;height:42px;background:var(--stone);border:4px solid var(--line);cursor:pointer;padding:0;position:relative}
+.burger span,.burger span::before,.burger span::after{position:absolute;left:8px;right:8px;height:4px;background:#fff;content:"";transition:transform .15s}
+.burger span{top:15px}.burger span::before{top:-9px;left:0;right:0}.burger span::after{top:9px;left:0;right:0}
+.burger[aria-expanded="true"] span{background:transparent}
+.burger[aria-expanded="true"] span::before{transform:translateY(9px) rotate(45deg)}
+.burger[aria-expanded="true"] span::after{transform:translateY(-9px) rotate(-45deg)}
+
+/* hero */
+.hero{position:relative;overflow:hidden;text-align:center;padding:84px 16px 0;background:linear-gradient(var(--sky-a),var(--sky-b))}
+.cloud{position:absolute;width:16px;height:16px;background:#fff;opacity:var(--cloud);box-shadow:16px 0 #fff,32px 0 #fff,48px 0 #fff,64px 0 #fff,16px -16px #fff,32px -16px #fff,48px -16px #fff,-16px 0 #fff;animation:drift 100s linear infinite}
+.cloud.c2{top:140px;transform:scale(.7);animation-duration:140s;animation-delay:-50s}
+@keyframes drift{from{left:-140px}to{left:100%}}
+.welcome{font-family:var(--head);font-size:clamp(11px,2.4vw,16px);color:#fff;text-shadow:3px 3px 0 rgba(0,0,0,.4);margin:0 0 16px;position:relative}
+.hero h1{font-size:clamp(26px,7vw,60px);color:#fff;text-shadow:6px 6px 0 rgba(0,0,0,.4);position:relative}
+.ip-label{font-size:26px;color:#fff;text-shadow:2px 2px 0 rgba(0,0,0,.4);margin:34px 0 10px;position:relative}
+.ip{display:inline-flex;margin-bottom:18px;position:relative;max-width:100%}
+.ip code{font-family:var(--head);font-size:clamp(10px,2.6vw,15px);background:#141417;color:#fff;border:4px solid var(--line);padding:16px 18px;overflow-wrap:anywhere;text-align:left}
+.ground{height:80px;background:linear-gradient(var(--grass) 0 20px,var(--grass-d) 20px 28px,var(--dirt) 28px);position:relative;box-shadow:inset 0 -3px 0 var(--dirt-d)}
+.ground::after{content:"";position:absolute;inset:28px 0 0;background:repeating-linear-gradient(90deg,transparent 0 44px,rgba(0,0,0,.16) 44px 48px),repeating-linear-gradient(0deg,transparent 0 20px,rgba(0,0,0,.16) 20px 24px)}
+
+/* sections */
+.sec{padding:72px 16px}
+.sec.alt{background:var(--panel2);border-block:4px solid var(--line)}
+.sec h2{font-size:clamp(16px,3.4vw,24px);margin-bottom:16px}
+.lead{max-width:60ch;color:var(--muted);font-size:24px;margin:0 0 32px}
+.grid{display:grid;gap:18px}
+.players{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+.player{text-align:center}
+.avatar{width:72px;height:72px;margin:0 auto 14px;border:4px solid var(--line);display:grid;place-items:center;font-family:var(--head);font-size:24px;color:#fff;box-shadow:inset -6px -6px 0 rgba(0,0,0,.25),inset 6px 6px 0 rgba(255,255,255,.2)}
+.player h3{font-size:11px;overflow-wrap:anywhere}
+.contact{grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+
+/* clips */
+.clips{grid-template-columns:repeat(auto-fill,minmax(290px,1fr));margin-top:24px}
+.clip{padding:0;overflow:hidden}
+.media{aspect-ratio:16/9;background:#000;border-bottom:4px solid var(--line);display:grid;place-items:center}
+.media iframe,.media video{width:100%;height:100%;border:0;display:block}
+.cbody{padding:16px 18px}
+.cbody h3{font-size:11px;margin-bottom:8px;overflow-wrap:anywhere}
+.cbody p{margin:0 0 12px;color:var(--muted)}
+.empty{grid-column:1/-1;color:var(--muted);font-size:26px;margin:0}
+
+/* admin */
+.admin{margin-top:24px}
+.admin-top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+.admin h3{font-size:12px}
+.stack{display:grid;gap:14px}
+label{display:grid;gap:6px;font-family:var(--head);font-size:10px}
+input,textarea{font:22px var(--body);color:var(--ink);background:var(--input);border:4px solid var(--line);padding:10px 12px;width:100%;border-radius:0}
+input[type=file]{font-size:18px;padding:8px}
+textarea{min-height:80px;resize:vertical}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+.hint{font-size:20px;color:var(--muted);margin:0}
+.err{color:#ff8a80;margin:0;min-height:1.2em}
+.ok{color:#8fd16b;margin:0;min-height:1.2em}
+
+/* login dialog */
+dialog{background:var(--panel);color:var(--ink);border:4px solid var(--line);padding:24px;width:min(92vw,380px)}
+dialog::backdrop{background:rgba(0,0,0,.7)}
+
+/* footer */
+.foot{background:#141417;border-top:4px solid var(--line);text-align:center;padding:32px 16px;display:grid;gap:8px;justify-items:center;color:var(--muted);font-size:20px}
+.foot b{font-family:var(--head);font-weight:400;font-size:12px;color:#fff}
+.link{background:none;border:0;color:var(--muted);font:inherit;text-decoration:underline;cursor:pointer;padding:4px}
+
+/* mobile */
+@media (max-width:900px){
+  .burger{display:block}
+  .menu{display:none;position:absolute;top:100%;left:0;right:0;flex-direction:column;gap:0;background:#141417;border-bottom:4px solid var(--line)}
+  .menu.open{display:flex}
+  .menu a{padding:18px 20px;border-top:3px solid var(--line)}
+  .sec{padding:56px 16px}
+  .ip{flex-direction:column}
+}
+@media (prefers-reduced-motion:reduce){.cloud{animation:none;left:10%}html{scroll-behavior:auto}}
+
+/* day / night */
+:root{--input:#141417;--sky-a:#0b0f2e;--sky-b:#27306b;--stars:1;--cloud:.12;color-scheme:dark}
+:root[data-theme="day"]{--bg:#f1ede4;--panel:#fff;--panel2:#e9e3d3;--ink:#2a2a2e;--muted:#55555e;--stone:#8a8a92;--line:#2a2a2e;--diamond:#0e8f83;--input:#fff;--sky-a:#5aa7ee;--sky-b:#bfe3ff;--stars:0;--cloud:.85;color-scheme:light}
+:root[data-theme="day"] .err{color:#b3261e}
+:root[data-theme="day"] .ok{color:#2e7d32}
+:root[data-theme="day"] .foot,:root[data-theme="day"] .link{color:#b0b0ba}
+.hero::before{content:"";position:absolute;top:30px;left:5%;width:4px;height:4px;background:#fff;opacity:var(--stars);box-shadow:120px 40px #fff,260px 12px #fff,380px 90px #fff,520px 30px #fff,640px 120px #fff,780px 50px #fff,900px 100px #fff,70px 150px #fff,330px 170px #fff,700px 20px #fff,1000px 60px #fff}
+.nav-right{display:flex;align-items:center;gap:8px}
+.theme{font-family:var(--head);font-size:10px;color:#fff;background:var(--stone);border:4px solid var(--line);padding:10px 12px;cursor:pointer;box-shadow:inset -3px -3px 0 rgba(0,0,0,.25),inset 3px 3px 0 rgba(255,255,255,.25)}
+.theme:hover{filter:brightness(1.12)}
+.status{display:flex;align-items:center;gap:10px;width:max-content;max-width:100%;margin:0 auto 10px;padding:8px 14px;background:#141417;color:#fff;border:4px solid #000;font-size:22px;position:relative}
+.dot{width:14px;height:14px;background:#888;border:2px solid #000;display:block;flex:none}
+.status.on .dot{background:#4cd137}.status.off .dot{background:#e84118}.status.wait .dot{background:#fbc531}
+.worldgrid{grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+.worldgrid p,.newslist p{white-space:pre-line;margin:0}
+.worldgrid .soon{color:var(--muted);font-style:italic}
+.newslist{max-width:760px}
+.date{font-size:20px;color:var(--diamond);margin-bottom:6px}
+[hidden]{display:none!important}
+.statuswrap{margin-bottom:52px;position:relative}
+.who{margin:0 auto;max-width:640px;font-size:22px;color:#fff;text-shadow:2px 2px 0 rgba(0,0,0,.45)}
+.box.rules{margin-bottom:24px;max-width:760px}
+.wide{grid-column:1/-1}
+.base{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:12px 0;border-top:3px dashed var(--stone)}
+.base strong{font-family:var(--head);font-weight:400;font-size:11px;display:block;margin-bottom:6px}
+.base code{font-family:var(--body);font-size:22px;color:var(--diamond)}
+.base p{margin:6px 0 0}
+.newslist .btn{margin-top:14px}
+.admin-sec{padding:40px 16px 0}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+.tab{font-family:var(--head);font-size:10px;color:#fff;background:var(--stone);border:4px solid var(--line);padding:10px 12px;cursor:pointer}
+.tab.on{background:var(--grass)}
+.ruleslist{list-style:none;margin:0;padding:10px 24px;counter-reset:r;max-width:760px}
+.ruleslist li{counter-increment:r;position:relative;padding:14px 0 14px 50px;border-bottom:3px dashed var(--stone);font-size:24px}
+.ruleslist li:last-child{border-bottom:0}
+.ruleslist li::before{content:counter(r);position:absolute;left:0;top:12px;width:34px;height:34px;background:var(--grass);color:#fff;border:3px solid #000;font-family:var(--head);font-size:11px;display:grid;place-items:center}
+.ruleslist li{font-size:22px}
+.ruleslist b{display:block;font-family:var(--head);font-weight:400;font-size:12px;line-height:1.6;margin-bottom:6px}
+.ruleslist span{color:var(--muted)}
+@media (max-width:980px){.menu a{padding:12px 8px}}
+.erow{display:grid;gap:10px;padding:14px 0;border-top:3px dashed var(--stone)}
+.erow input[type=number]{max-width:110px}
+.sub{font-size:11px;margin-top:6px}
+.subhead{font-size:12px;margin:8px 0 16px}
+.player{position:relative}
+.rank{position:absolute;top:10px;left:10px;font-family:var(--head);font-size:10px;color:#fff;background:var(--stone);border:3px solid #000;padding:6px 8px}
+.player.first .rank{background:#c9a227}
+.pstats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:14px}
+.ps{background:var(--panel2);border:3px solid var(--line);padding:6px 2px}
+.ps b{display:block;font-family:var(--head);font-weight:400;font-size:12px;margin-bottom:4px}
+.ps span{font-size:18px;color:var(--muted)}
+.ps.hp b{color:#e84118}
+.gallery{grid-template-columns:repeat(auto-fill,minmax(250px,1fr))}
+.shot{display:block;aspect-ratio:4/3;background:#000;border-bottom:4px solid var(--line)}
+.shot img{width:100%;height:100%;object-fit:cover;display:block}
+.nums{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.nums input{max-width:none!important}
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="nav-in">
+    <a class="logo" href="#home"><i></i>Drizzle Craft</a>
+    <div class="nav-right">
+      <nav id="menu" class="menu">
+      <a href="#home">Home</a>
+      <a href="#info">Info</a>
+      <a href="#world">World</a>
+      <a href="#rules">Rules</a>
+      <a href="#news">News</a>
+      <a href="#gallery">Gallery</a>
+      <a href="#clips">Clips</a>
+      <a href="#contact">Contact</a>
+    </nav>
+      <button class="theme" id="theme" type="button"></button>
+      <button class="burger" id="burger" aria-label="Open menu" aria-expanded="false" aria-controls="menu"><span></span></button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section id="home" class="hero">
+    <div class="cloud" style="top:36px;left:6%"></div>
+    <div class="cloud c2" style="left:55%"></div>
+    <p class="welcome">Welcome to</p>
+    <h1>Drizzle Craft</h1>
+    <p class="ip-label">Server IP</p>
+    <div class="ip">
+      <code id="ipText">DrizzleCraft.aternos.me</code>
+      <button class="btn" id="copy" type="button">Copy IP</button>
+    </div>
+    <div class="statuswrap"><p class="status" id="status" aria-live="polite"><i class="dot"></i><span>Checking server…</span></p>
+    <p class="who" id="who" hidden></p></div>
+    <div class="ground"></div>
+  </section>
+
+  <div id="adminMount"></div>
+
+  <section id="info" class="sec">
+    <div class="wrap">
+      <h2>Info</h2>
+      <p class="lead">Drizzle Craft is a private server played by 4 friends. The server is only open to us, but you can see what we’re up to on it through this website.</p>
+      <article class="box rules"><h3>Lifesteal server</h3>
+        <p>Drizzle Craft is a lifesteal server. When you kill another player, you gain a heart. The player who gets killed does not lose a heart.</p></article>
+      <h3 class="subhead">Hearts leaderboard</h3>
+      <div class="grid players" id="players"></div>
+    </div>
+  </section>
+
+  <section id="world" class="sec alt">
+    <div class="wrap">
+      <h2>World info</h2>
+      <p class="lead">The basics about our Drizzle Craft world.</p>
+      <div class="grid worldgrid" id="worldGrid"></div>
+    </div>
+  </section>
+
+  <section id="rules" class="sec">
+    <div class="wrap">
+      <h2>Server Rules</h2>
+      <ol class="box ruleslist" id="rulesList"></ol>
+    </div>
+  </section>
+
+  <section id="news" class="sec alt">
+    <div class="wrap">
+      <h2>News</h2>
+      <div class="grid newslist" id="newsList"></div>
+    </div>
+  </section>
+
+  <section id="gallery" class="sec">
+    <div class="wrap">
+      <h2>Gallery</h2>
+      <p class="lead">Screenshots of our builds and best moments.</p>
+      <div class="grid gallery" id="galleryGrid"></div>
+    </div>
+  </section>
+
+  <section id="clips" class="sec alt">
+    <div class="wrap">
+      <h2>Clips</h2>
+      <div class="grid clips" id="clipGrid" aria-live="polite"><p class="empty">Loading clips…</p></div>
+    </div>
+  </section>
+
+  <section id="contact" class="sec">
+    <div class="wrap">
+      <h2>Contact</h2>
+      <div class="grid contact">
+        <div class="box"><h3>Discord</h3><p>Chat with us on our server.</p>
+          <a class="btn" href="https://discord.gg/RSU6FK4GRK" target="_blank" rel="noopener noreferrer">Join Discord</a></div>
+        <div class="box"><h3>Email</h3><p><a href="mailto:mr17171717171717@gmail.com">mr17171717171717@gmail.com</a></p></div>
+        <div class="box"><h3>Staff hours</h3><p>24/7</p></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="foot">
+  <b>Drizzle Craft</b>
+  <span>Not affiliated with Mojang or Microsoft.</span>
+  <button class="link" id="adminLink" type="button">Admin login</button>
+</footer>
+
+<dialog id="loginDlg">
+  <form id="loginForm" method="dialog" class="stack">
+    <h3>Admin login</h3>
+    <label>Username<input id="lUser" autocomplete="username" required></label>
+    <label>Password<input id="lPass" type="password" autocomplete="current-password" required></label>
+    <p class="err" id="lErr" role="alert"></p>
+    <div class="row"><button class="btn" type="submit">Log in</button><button class="btn gray" type="button" id="lCancel">Cancel</button></div>
+  </form>
+</dialog>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script>
+// Paste the two values from Supabase: Project Settings > API.
+// The anon key is meant to be public. Real protection comes from the
+// database rules in setup.sql, never from hiding this key.
+window.DC_CONFIG = {
+  SUPABASE_URL: "https://zdpmxlcijysljjitkxaf.supabase.co",
+  SUPABASE_ANON_KEY: "sb_publishable_cNVlNHT3kQZ-MPtd72SBAg_YM0NwNeF",
+  // Admin usernames are turned into emails like  aneeq@drizzlecraft.site
+  // (no email is ever sent). Keep this the same as when you create the admin.
+  ADMIN_EMAIL_DOMAIN: "aneeq.com"
+};
+
+// Default world info and rules. Once the database is set up, the admin panel edits these instead.
+window.DC_CONTENT = {
+  world: [
+    { label: "Minecraft version", value: "26.3" },
+    { label: "Server software",   value: "Paper" },
+    { label: "Difficulty",        value: "Easy" },
+    { label: "World seed",        value: "4778174833863121280" }
+  ],
+  
+  rules: [
+    { title: "No Killing Unarmored Players", text: "Do not kill players who aren’t wearing armor just to take their hearts." },
+    { title: "No Heart Farming",             text: "Repeatedly killing each other to farm hearts is strictly prohibited and will result in staff action." },
+    { title: "Keep Language Clean",          text: "No swearing or profanity. Breaking this rule will result in an automatic or staff-issued mute." },
+    { title: "No Griefing",                  text: "Do not destroy, steal from, or grief public farms, player builds, or Spawn." },
+    { title: "Be Respectful",                text: "Keep chat welcoming, respectful, and friendly toward all members." }
+  ]
+};
+</script>
+<script>
+(function () {
+  "use strict";
+  var $ = function (id) { return document.getElementById(id); };
+  var cfg = window.DC_CONFIG || {};
+  var configured = cfg.SUPABASE_URL && cfg.SUPABASE_URL.indexOf("YOUR-PROJECT") === -1;
+  var db = configured ? window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY) : null;
+  var isAdmin = false;
+
+  /* ---------- helpers ---------- */
+  function el(tag, props, kids) {
+    var n = document.createElement(tag);
+    Object.keys(props || {}).forEach(function (k) {
+      if (k === "text") n.textContent = props[k];
+      else if (k === "class") n.className = props[k];
+      else n.setAttribute(k, props[k]);
+    });
+    (kids || []).forEach(function (c) { n.appendChild(c); });
+    return n;
+  }
+  function safeUrl(u) {
+    try { var x = new URL(u); return (x.protocol === "https:" || x.protocol === "http:") ? x.href : null; }
+    catch (e) { return null; }
+  }
+
+  /* ---------- day / night ---------- */
+  var themeBtn = $("theme");
+  function applyTheme(t) {
+    document.documentElement.setAttribute("data-theme", t);
+    themeBtn.textContent = t === "night" ? "Day" : "Night";
+    themeBtn.setAttribute("aria-label", "Switch to " + (t === "night" ? "day" : "night") + " mode");
+  }
+  var saved = null;
+  try { saved = localStorage.getItem("dc-theme"); } catch (e) {}
+  applyTheme(saved === "day" || saved === "night" ? saved :
+    (window.matchMedia && matchMedia("(prefers-color-scheme: light)").matches ? "day" : "night"));
+  themeBtn.addEventListener("click", function () {
+    var n = document.documentElement.getAttribute("data-theme") === "night" ? "day" : "night";
+    applyTheme(n);
+    try { localStorage.setItem("dc-theme", n); } catch (e) {}
+  });
+
+  /* ---------- nav ---------- */
+  var burger = $("burger"), menu = $("menu");
+  function setMenu(open) {
+    menu.classList.toggle("open", open);
+    burger.setAttribute("aria-expanded", String(open));
+    burger.setAttribute("aria-label", open ? "Close menu" : "Open menu");
+  }
+  burger.addEventListener("click", function () { setMenu(!menu.classList.contains("open")); });
+  menu.addEventListener("click", function (e) { if (e.target.tagName === "A") setMenu(false); });
+
+  /* ---------- copy IP ---------- */
+  $("copy").addEventListener("click", function () {
+    var btn = this, ip = $("ipText").textContent;
+    function done(t) { btn.textContent = t; setTimeout(function () { btn.textContent = "Copy IP"; }, 1600); }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(ip).then(function () { done("Copied!"); }, function () { done("Select & copy"); });
+    } else { done("Select & copy"); }
+  });
+
+  /* ---------- default content (used until the database has its own) ---------- */
+  var content = window.DC_CONTENT || {};
+  var basesBox = el("article", { class: "box wide" });
+  var FALLBACK = {
+    rules: (content.rules || []).map(function (r, i) { return { title: r.title, body: r.text, sort_order: i + 1 }; }),
+    world_info: (content.world || []).map(function (w, i) { return { label: w.label, value: w.value, sort_order: i + 1 }; }),
+    players: ["AneeqTheGeeK69", "KingAffan500", "noobpro112013", "JustaJust"].map(function (n) { return { name: n, hearts: 10, kills: 0, deaths: 0 }; })
+  };
+
+  /* ---------- server status ---------- */
+  function normalize(d, src) {
+    if (!d) throw new Error("no data");
+    var motd = d.motd && d.motd.clean;
+    if (Array.isArray(motd)) motd = motd.join(" ");
+    var ver = d.version;
+    if (ver && typeof ver === "object") ver = ver.name_clean || ver.name || "";
+    var list = (d.players && d.players.list) || [];
+    return {
+      src: src, online: !!d.online, ver: ver || "", motd: motd || "",
+      count: d.players && typeof d.players.online === "number" ? d.players.online : null,
+      names: list.map(function (p) { return typeof p === "string" ? p : (p.name_clean || p.name || ""); }).filter(Boolean)
+    };
+  }
+  function getJson(url) {
+    return fetch(url, { cache: "no-store" }).then(function (r) { if (!r.ok) throw new Error("bad"); return r.json(); });
+  }
+  function getStatus(host) {
+    var jobs = [
+      getJson("https://api.mcsrvstat.us/3/" + host).then(function (d) { return normalize(d, "mcsrvstat.us"); }),
+      getJson("https://api.mcstatus.io/v2/status/java/" + host).then(function (d) { return normalize(d, "mcstatus.io"); })
+    ].map(function (p) { return p.catch(function () { return null; }); });
+    return Promise.all(jobs).then(function (all) {
+      all = all.filter(Boolean);
+      if (!all.length) throw new Error("no checker answered");
+      var live = all.filter(function (s) { return s.online && !/offline/i.test(s.ver); });
+      return live[0] || all[0];
+    });
+  }
+  var lastNote = "No answer yet. Try again in a few seconds.";
+  function checkStatus() {
+    var box = $("status"), label = box.querySelector("span"), who = $("who");
+    function set(cls, txt, names) {
+      box.className = "status " + cls; label.textContent = txt;
+      who.hidden = !(names && names.length);
+      who.textContent = names && names.length ? "Playing now: " + names.join(", ") : "";
+    }
+    getStatus(encodeURIComponent($("ipText").textContent)).then(function (s) {
+      lastNote = "Checker: " + s.src + "\nonline: " + s.online + "\nversion: " + s.ver + "\nmotd: " + s.motd +
+        "\nplayers: " + s.count + (s.names.length ? " (" + s.names.join(", ") + ")" : "");
+      if (!s.online || /offline/i.test(s.ver)) set("off", "Offline");
+      else if (/starting|loading|preparing|queue|waiting|saving/i.test(s.ver)) set("wait", "Starting up…");
+      else set("on", "Online" + (s.count !== null ? " · " + s.count + " playing" : ""), s.names);
+    }).catch(function () { lastNote = "Neither status checker answered."; set("", "Status unavailable"); });
+  }
+  $("status").style.cursor = "pointer";
+  $("status").title = "Click for details";
+  $("status").addEventListener("click", function () { alert(lastNote); });
+  checkStatus();
+  setInterval(checkStatus, 60000);
+
+  /* ---------- data: clips, news, bases ---------- */
+  var data = { clips: [], news: [], bases: [], rules: FALLBACK.rules, world_info: FALLBACK.world_info, players: FALLBACK.players, screenshots: [] };
+  var editors = {};
+
+  function adminDelete(table, row, label) {
+    var b = el("button", { class: "btn red small", type: "button", text: "Delete" });
+    b.addEventListener("click", function () {
+      if (!confirm("Delete \"" + label + "\"?")) return;
+      db.from(table).delete().eq("id", row.id).then(function (r) {
+        if (r.error) { alert("Could not delete: " + r.error.message); return; }
+        if (row.storage_path) db.storage.from(table === "screenshots" ? "screenshots" : "clips").remove([row.storage_path]);
+        load(table);
+      });
+    });
+    return b;
+  }
+
+  function embedFor(clip) {
+    var url = safeUrl(clip.video_url);
+    if (!url) return el("p", { class: "hint", text: "Invalid link" });
+    var yt = url.match(/(?:youtube\.com\/(?:watch\?v=|shorts\/|embed\/)|youtu\.be\/)([\w-]{11})/);
+    if (yt) {
+      return el("iframe", {
+        src: "https://www.youtube-nocookie.com/embed/" + yt[1], title: clip.title, loading: "lazy",
+        allow: "accelerometer; encrypted-media; picture-in-picture", allowfullscreen: ""
+      });
+    }
+    if (clip.storage_path || /\.(mp4|webm|ogg|mov)(\?|$)/i.test(url)) {
+      return el("video", { src: url, controls: "", preload: "metadata", playsinline: "" });
+    }
+    return el("a", { class: "btn small", href: url, target: "_blank", rel: "noopener noreferrer", text: "Watch clip" });
+  }
+
+  function renderClips() {
+    var grid = $("clipGrid");
+    grid.textContent = "";
+    if (!data.clips.length) { grid.appendChild(el("p", { class: "empty", text: "No clips available." })); return; }
+    data.clips.forEach(function (c) {
+      var body = el("div", { class: "cbody" }, [el("h3", { text: c.title })]);
+      if (c.description) body.appendChild(el("p", { text: c.description }));
+      if (isAdmin) body.appendChild(adminDelete("clips", c, c.title));
+      grid.appendChild(el("article", { class: "box clip" }, [el("div", { class: "media" }, [embedFor(c)]), body]));
+    });
+  }
+
+  function renderNews() {
+    var list = $("newsList");
+    list.textContent = "";
+    if (!data.news.length) { list.appendChild(el("p", { class: "empty", text: "No news yet." })); return; }
+    data.news.forEach(function (n) {
+      var when = new Date(n.created_at).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
+      var kids = [el("div", { class: "date", text: when }), el("h3", { text: n.title })];
+      if (n.body) kids.push(el("p", { text: n.body }));
+      if (isAdmin) kids.push(adminDelete("news", n, n.title));
+      list.appendChild(el("article", { class: "box" }, kids));
+    });
+  }
+
+  function renderBases() {
+    basesBox.textContent = "";
+    basesBox.appendChild(el("h3", { text: "Bases and coordinates" }));
+    if (!data.bases.length) { basesBox.appendChild(el("p", { class: "soon", text: "Coming soon" })); return; }
+    data.bases.forEach(function (b) {
+      var info = el("div", {}, [el("strong", { text: b.name }), el("code", { text: b.coordinates })]);
+      if (b.description) info.appendChild(el("p", { text: b.description }));
+      var row = el("div", { class: "base" }, [info]);
+      if (isAdmin) row.appendChild(adminDelete("bases", b, b.name));
+      basesBox.appendChild(row);
+    });
+  }
+
+  var PALETTE = ["#5d9b3a", "#c9a227", "#3a7bd5", "#b5483a", "#8e44ad", "#16a085"];
+  function colorFor(name) {
+    var s = 0;
+    for (var i = 0; i < name.length; i++) s += name.charCodeAt(i);
+    return PALETTE[s % PALETTE.length];
+  }
+  function renderPlayers() {
+    var g = $("players");
+    g.textContent = "";
+    var list = data.players.slice().sort(function (a, b) {
+      return (b.hearts - a.hearts) || (b.kills - a.kills) || a.name.localeCompare(b.name);
+    });
+    list.forEach(function (p, i) {
+      function stat(top, label, cls) { return el("div", { class: "ps " + (cls || "") }, [el("b", { text: top }), el("span", { text: label })]); }
+      g.appendChild(el("article", { class: "box player" + (i === 0 ? " first" : "") }, [
+        el("div", { class: "rank", text: "#" + (i + 1) }),
+        el("div", { class: "avatar", text: p.name.charAt(0).toUpperCase(), style: "background:" + colorFor(p.name) }),
+        el("h3", { text: p.name }),
+        el("div", { class: "pstats" }, [
+          stat("♥ " + p.hearts, "Hearts", "hp"), stat(String(p.kills), "Kills"), stat(String(p.deaths), "Deaths")
+        ])
+      ]));
+    });
+  }
+
+  function renderGallery() {
+    var g = $("galleryGrid");
+    g.textContent = "";
+    if (!data.screenshots.length) { g.appendChild(el("p", { class: "empty", text: "No screenshots yet." })); return; }
+    data.screenshots.forEach(function (s) {
+      var url = safeUrl(s.image_url);
+      if (!url) return;
+      var link = el("a", { class: "shot", href: url, target: "_blank", rel: "noopener noreferrer" }, [
+        el("img", { src: url, alt: s.title || "Drizzle Craft screenshot", loading: "lazy" })
+      ]);
+      var kids = [link], body = el("div", { class: "cbody" });
+      if (s.title) body.appendChild(el("h3", { text: s.title }));
+      if (isAdmin) body.appendChild(adminDelete("screenshots", s, s.title || "this screenshot"));
+      if (body.childNodes.length) kids.push(body);
+      g.appendChild(el("article", { class: "box clip" }, kids));
+    });
+  }
+
+  function renderRules() {
+    var ul = $("rulesList");
+    ul.textContent = "";
+    if (!data.rules.length) { ul.appendChild(el("li", { text: "No rules yet." })); return; }
+    data.rules.forEach(function (r) {
+      var li = el("li", {}, [el("b", { text: r.title })]);
+      if (r.body) li.appendChild(el("span", { text: r.body }));
+      ul.appendChild(li);
+    });
+  }
+
+  function renderWorld() {
+    var g = $("worldGrid");
+    g.textContent = "";
+    data.world_info.forEach(function (w) {
+      var has = w.value && String(w.value).trim();
+      g.appendChild(el("article", { class: "box" }, [
+        el("h3", { text: w.label }),
+        el("p", { class: has ? "" : "soon", text: has ? w.value : "Coming soon" })
+      ]));
+    });
+    g.appendChild(basesBox);
+  }
+
+  var renderers = { clips: renderClips, news: renderNews, bases: renderBases, rules: renderRules, world_info: renderWorld, players: renderPlayers, screenshots: renderGallery };
+  var TABLE = { players: "player_stats" };
+  var ORDER = { clips: ["created_at", false], news: ["created_at", false], bases: ["created_at", false], rules: ["sort_order", true], world_info: ["sort_order", true], players: ["created_at", true], screenshots: ["created_at", false] };
+  function renderAll() { renderClips(); renderNews(); renderBases(); renderRules(); renderWorld(); renderPlayers(); renderGallery(); }
+  function load(table) {
+    function done(rows) {
+      data[table] = rows;
+      renderers[table]();
+      if (isAdmin && editors[table]) editors[table]();
+    }
+    if (!db) { done(FALLBACK[table] || []); return; }
+    db.from(TABLE[table] || table).select("*").order(ORDER[table][0], { ascending: ORDER[table][1] }).then(function (r) {
+      done(r.error ? (FALLBACK[table] || []) : r.data);
+    });
+  }
+  function loadAll() { ["clips", "news", "bases", "rules", "world_info", "players", "screenshots"].forEach(load); }
+  renderWorld(); renderRules(); renderBases(); renderPlayers(); renderGallery();
+
+  /* ---------- admin panel (built only after a verified admin login) ---------- */
+  function buildPanel() {
+    var mount = $("adminMount");
+    mount.textContent = "";
+    editors = {};
+    if (!isAdmin) return;
+    var msg = el("p", { class: "err", role: "alert" });
+
+    function field(label, node) { return el("label", {}, [document.createTextNode(label), node]); }
+    function insert(table, row) {
+      return db.from(table).insert(row).then(function (r) { if (r.error) throw r.error; });
+    }
+    function make(fields, label, work, okText, table) {
+      var form = el("form", { class: "stack" }, fields.concat([
+        el("div", { class: "row" }, [el("button", { class: "btn", type: "submit", text: label })])
+      ]));
+      form.addEventListener("submit", function (e) {
+        e.preventDefault();
+        var btn = form.querySelector("button[type=submit]"), old = btn.textContent;
+        msg.className = "err"; msg.textContent = "";
+        btn.disabled = true; btn.textContent = "Saving…";
+        Promise.resolve().then(work).then(function () {
+          form.reset(); msg.className = "ok"; msg.textContent = okText; load(table);
+        }).catch(function (err) {
+          msg.textContent = (err && err.message) || "Could not save.";
+        }).then(function () { btn.disabled = false; btn.textContent = old; });
+      });
+      return form;
+    }
+
+    var cTitle = el("input", { maxlength: "100", required: "" });
+    var cLink = el("input", { type: "url", placeholder: "https://youtube.com/watch?v=..." });
+    var cFile = el("input", { type: "file", accept: "video/*" });
+    var cDesc = el("textarea", { maxlength: "500" });
+    var clipForm = make([
+      field("Title", cTitle), field("Video link", cLink), field("or upload a video file", cFile),
+      el("p", { class: "hint", text: "Use a link or a file (max 50 MB)." }), field("Description (optional)", cDesc)
+    ], "Add clip", function () {
+      var f = cFile.files[0], url = safeUrl(cLink.value.trim());
+      if (!f && !url) throw new Error("Add a valid link or choose a file.");
+      if (f && f.size > 50 * 1024 * 1024) throw new Error("File is over 50 MB.");
+      var step = Promise.resolve({ url: url, path: null });
+      if (f) {
+        var path = (crypto.randomUUID ? crypto.randomUUID() : Date.now()) + "-" + f.name.replace(/[^\w.\-]/g, "_");
+        step = db.storage.from("clips").upload(path, f, { contentType: f.type }).then(function (r) {
+          if (r.error) throw r.error;
+          return { url: db.storage.from("clips").getPublicUrl(path).data.publicUrl, path: path };
+        });
+      }
+      return step.then(function (m) {
+        return insert("clips", { title: cTitle.value.trim(), description: cDesc.value.trim() || null, video_url: m.url, storage_path: m.path });
+      });
+    }, "Clip added.", "clips");
+
+    var nTitle = el("input", { maxlength: "120", required: "" });
+    var nText = el("textarea", { maxlength: "2000" });
+    var newsForm = make([field("Title", nTitle), field("Text (optional)", nText)], "Post news", function () {
+      return insert("news", { title: nTitle.value.trim(), body: nText.value.trim() || null });
+    }, "News posted.", "news");
+
+    var bName = el("input", { maxlength: "80", required: "" });
+    var bCoords = el("input", { maxlength: "120", required: "", placeholder: "X 120, Y 64, Z -300" });
+    var bDesc = el("textarea", { maxlength: "500" });
+    var baseForm = make([field("Base name", bName), field("Coordinates", bCoords), field("Description (optional)", bDesc)], "Add base", function () {
+      return insert("bases", { name: bName.value.trim(), coordinates: bCoords.value.trim(), description: bDesc.value.trim() || null });
+    }, "Base added.", "bases");
+
+    function editor(table, cfg) {
+      var box = el("div", { class: "stack editor" });
+      function nextOrder() {
+        var m = 0;
+        data[table].forEach(function (x) { if (x.sort_order > m) m = x.sort_order; });
+        return m + 1;
+      }
+      function rowFor(item) {
+        var isNew = !item;
+        var ord = el("input", { type: "number", min: "0", max: "999", value: String(isNew ? nextOrder() : (item.sort_order || 0)) });
+        var a = el("input", { maxlength: String(cfg.aMax), value: isNew ? "" : (item[cfg.a] || "") });
+        var b = el("textarea", { maxlength: "500" });
+        b.value = isNew ? "" : (item[cfg.b] || "");
+        var save = el("button", { class: "btn small", type: "button", text: isNew ? "Add" : "Save" });
+        var btns = el("div", { class: "row" }, [save]);
+        save.addEventListener("click", function () {
+          msg.className = "err"; msg.textContent = "";
+          if (!isNew && !item.id) { msg.textContent = "Run the new SQL step in Supabase first."; return; }
+          if (!a.value.trim()) { msg.textContent = cfg.aLabel + " can’t be empty."; return; }
+          var row = { sort_order: parseInt(ord.value, 10) || 0 };
+          row[cfg.a] = a.value.trim();
+          row[cfg.b] = b.value.trim() || null;
+          save.disabled = true;
+          var q = isNew ? db.from(table).insert(row) : db.from(table).update(row).eq("id", item.id);
+          q.then(function (r) {
+            save.disabled = false;
+            if (r.error) { msg.textContent = "Could not save: " + r.error.message; return; }
+            msg.className = "ok"; msg.textContent = isNew ? "Added." : "Saved.";
+            load(table);
+          });
+        });
+        if (!isNew) {
+          var del = el("button", { class: "btn red small", type: "button", text: "Delete" });
+          del.addEventListener("click", function () {
+            if (!item.id) { msg.textContent = "Run the new SQL step in Supabase first."; return; }
+            if (!confirm("Delete \"" + item[cfg.a] + "\"?")) return;
+            db.from(table).delete().eq("id", item.id).then(function (r) {
+              if (r.error) { msg.className = "err"; msg.textContent = "Could not delete: " + r.error.message; return; }
+              msg.className = "ok"; msg.textContent = "Deleted.";
+              load(table);
+            });
+          });
+          btns.appendChild(del);
+        }
+        return el("div", { class: "erow" }, [field("Order", ord), field(cfg.aLabel, a), field(cfg.bLabel, b), btns]);
+      }
+      box.refresh = function () {
+        box.textContent = "";
+        box.appendChild(el("h3", { class: "sub", text: "Add new" }));
+        box.appendChild(rowFor(null));
+        if (data[table].length) box.appendChild(el("h3", { class: "sub", text: "Edit existing" }));
+        data[table].forEach(function (it) { box.appendChild(rowFor(it)); });
+      };
+      return box;
+    }
+    var rulesEd = editor("rules", { a: "title", b: "body", aLabel: "Rule title", bLabel: "Rule text", aMax: 100 });
+    var worldEd = editor("world_info", { a: "label", b: "value", aLabel: "Label", bLabel: "Value", aMax: 60 });
+    editors.rules = rulesEd.refresh;
+    editors.world_info = worldEd.refresh;
+    rulesEd.refresh();
+    worldEd.refresh();
+
+    var sTitle = el("input", { maxlength: "100" });
+    var sFile = el("input", { type: "file", accept: "image/png,image/jpeg,image/webp,image/gif", required: "" });
+    var shotForm = make([
+      field("Caption (optional)", sTitle), field("Picture", sFile),
+      el("p", { class: "hint", text: "PNG, JPG, WEBP or GIF, max 10 MB." })
+    ], "Add screenshot", function () {
+      var f = sFile.files[0];
+      if (!f) throw new Error("Choose a picture.");
+      if (!/^image\/(png|jpeg|webp|gif)$/.test(f.type)) throw new Error("Use a PNG, JPG, WEBP or GIF picture.");
+      if (f.size > 10 * 1024 * 1024) throw new Error("Picture is over 10 MB.");
+      var path = (crypto.randomUUID ? crypto.randomUUID() : Date.now()) + "-" + f.name.replace(/[^\w.\-]/g, "_");
+      return db.storage.from("screenshots").upload(path, f, { contentType: f.type }).then(function (r) {
+        if (r.error) throw r.error;
+        var url = db.storage.from("screenshots").getPublicUrl(path).data.publicUrl;
+        return insert("screenshots", { title: sTitle.value.trim() || null, image_url: url, storage_path: path })
+          .catch(function (e) { db.storage.from("screenshots").remove([path]); throw e; });
+      });
+    }, "Screenshot added.", "screenshots");
+
+    function playersEditor() {
+      var box = el("div", { class: "stack editor" });
+      function num(v) { return el("input", { type: "number", min: "0", max: "99999", value: String(v) }); }
+      function toInt(x) { var v = parseInt(x.value, 10); return isNaN(v) || v < 0 ? 0 : v; }
+      function rowFor(item) {
+        var isNew = !item;
+        var name = el("input", { maxlength: "40", value: isNew ? "" : item.name });
+        var hearts = num(isNew ? 10 : item.hearts), kills = num(isNew ? 0 : item.kills), deaths = num(isNew ? 0 : item.deaths);
+        var save = el("button", { class: "btn small", type: "button", text: isNew ? "Add" : "Save" });
+        var btns = el("div", { class: "row" }, [save]);
+        save.addEventListener("click", function () {
+          msg.className = "err"; msg.textContent = "";
+          if (!isNew && !item.id) { msg.textContent = "Run the new SQL step in Supabase first."; return; }
+          if (!name.value.trim()) { msg.textContent = "Player name can’t be empty."; return; }
+          var row = { name: name.value.trim(), hearts: toInt(hearts), kills: toInt(kills), deaths: toInt(deaths) };
+          save.disabled = true;
+          var q = isNew ? db.from("player_stats").insert(row) : db.from("player_stats").update(row).eq("id", item.id);
+          q.then(function (r) {
+            save.disabled = false;
+            if (r.error) { msg.textContent = "Could not save: " + r.error.message; return; }
+            msg.className = "ok"; msg.textContent = isNew ? "Player added." : "Saved.";
+            load("players");
+          });
+        });
+        if (!isNew) {
+          var del = el("button", { class: "btn red small", type: "button", text: "Delete" });
+          del.addEventListener("click", function () {
+            if (!item.id) { msg.textContent = "Run the new SQL step in Supabase first."; return; }
+            if (!confirm("Delete player \"" + item.name + "\"?")) return;
+            db.from("player_stats").delete().eq("id", item.id).then(function (r) {
+              if (r.error) { msg.className = "err"; msg.textContent = "Could not delete: " + r.error.message; return; }
+              msg.className = "ok"; msg.textContent = "Deleted.";
+              load("players");
+            });
+          });
+          btns.appendChild(del);
+        }
+        return el("div", { class: "erow" }, [
+          field("Player name", name),
+          el("div", { class: "nums" }, [field("Hearts", hearts), field("Kills", kills), field("Deaths", deaths)]),
+          btns
+        ]);
+      }
+      box.refresh = function () {
+        box.textContent = "";
+        box.appendChild(el("h3", { class: "sub", text: "Add new player" }));
+        box.appendChild(rowFor(null));
+        if (data.players.length) box.appendChild(el("h3", { class: "sub", text: "Edit players" }));
+        data.players.forEach(function (it) { box.appendChild(rowFor(it)); });
+      };
+      return box;
+    }
+    var playersEd = playersEditor();
+    editors.players = playersEd.refresh;
+    playersEd.refresh();
+
+    var tabs = [["+ Clip", clipForm], ["+ News", newsForm], ["+ Base", baseForm], ["+ Photo", shotForm], ["Rules", rulesEd], ["World", worldEd], ["Players", playersEd]];
+    var bar = el("div", { class: "tabs" });
+    tabs.forEach(function (t, i) {
+      var b = el("button", { class: "tab" + (i ? "" : " on"), type: "button", text: t[0] });
+      t[1].hidden = i !== 0;
+      b.addEventListener("click", function () {
+        tabs.forEach(function (x, j) { x[1].hidden = j !== i; });
+        Array.prototype.forEach.call(bar.children, function (c, j) { c.classList.toggle("on", j === i); });
+        msg.textContent = "";
+      });
+      bar.appendChild(b);
+    });
+
+    var out = el("button", { class: "btn gray small", type: "button", text: "Log out" });
+    out.addEventListener("click", function () { db.auth.signOut().then(function () { setAdmin(false); }); });
+
+    mount.appendChild(el("section", { class: "sec admin-sec" }, [el("div", { class: "wrap" }, [
+      el("div", { class: "box admin" }, [
+        el("div", { class: "admin-top" }, [el("h3", { text: "Admin panel" }), out]),
+        bar, clipForm, newsForm, baseForm, shotForm, rulesEd, worldEd, playersEd, msg
+      ])
+    ])]));
+  }
+
+  function setAdmin(v) {
+    isAdmin = v;
+    $("adminLink").hidden = v;
+    buildPanel();
+    renderAll();
+  }
+
+  function checkAdmin() {
+    if (!db) return;
+    db.auth.getSession().then(function (s) {
+      if (!s.data.session) { setAdmin(false); return; }
+      db.rpc("is_admin").then(function (r) { setAdmin(r.data === true); });
+    });
+  }
+
+  /* ---------- login dialog ---------- */
+  var dlg = $("loginDlg");
+  $("adminLink").addEventListener("click", function () {
+    if (!db) { alert("Set up config.js first (see the setup steps)."); return; }
+    $("lErr").textContent = ""; dlg.showModal();
+  });
+  $("lCancel").addEventListener("click", function () { dlg.close(); });
+  $("loginForm").addEventListener("submit", function (e) {
+    e.preventDefault();
+    var user = $("lUser").value.trim().toLowerCase().replace(/[^a-z0-9._-]/g, "");
+    db.auth.signInWithPassword({ email: user + "@" + cfg.ADMIN_EMAIL_DOMAIN, password: $("lPass").value }).then(function (r) {
+      if (r.error) { $("lErr").textContent = "Wrong username or password."; return; }
+      db.rpc("is_admin").then(function (a) {
+        if (a.data !== true) { db.auth.signOut(); $("lErr").textContent = "This account is not an admin."; return; }
+        $("lPass").value = ""; dlg.close(); setAdmin(true);
+        $("adminMount").scrollIntoView();
+      });
+    });
+  });
+
+  loadAll();
+  checkAdmin();
+})();
+</script>
+</body>
+</html>
