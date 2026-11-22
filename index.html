@@ -77,6 +77,13 @@ a{color:var(--diamond)}
 .player h3{font-size:11px;overflow-wrap:anywhere}
 .contact{grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
 
+/* owners */
+.owners{grid-template-columns:repeat(auto-fit,minmax(260px,1fr));max-width:760px}
+.owner{text-align:center;display:flex;flex-direction:column;align-items:center}
+.role-tag{font-family:var(--head);font-size:9px;color:#141417;background:#c9a227;border:3px solid var(--line);padding:5px 10px;margin-bottom:12px;display:inline-block;box-shadow:inset -3px -3px 0 rgba(0,0,0,.22),inset 3px 3px 0 rgba(255,255,255,.32)}
+.owner h3{font-size:12px;margin-bottom:6px;overflow-wrap:anywhere}
+.owner p{margin:0;font-size:21px;color:var(--muted)}
+
 /* clips */
 .clips{grid-template-columns:repeat(auto-fill,minmax(290px,1fr));margin-top:24px}
 .clip{padding:0;overflow:hidden}
@@ -143,11 +150,6 @@ dialog::backdrop{background:rgba(0,0,0,.7)}
 .statuswrap{margin-bottom:52px;position:relative}
 .who{margin:0 auto;max-width:640px;font-size:22px;color:#fff;text-shadow:2px 2px 0 rgba(0,0,0,.45)}
 .box.rules{margin-bottom:24px;max-width:760px}
-.wide{grid-column:1/-1}
-.base{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:12px 0;border-top:3px dashed var(--stone)}
-.base strong{font-family:var(--head);font-weight:400;font-size:11px;display:block;margin-bottom:6px}
-.base code{font-family:var(--body);font-size:22px;color:var(--diamond)}
-.base p{margin:6px 0 0}
 .newslist .btn{margin-top:14px}
 .admin-sec{padding:40px 16px 0}
 .tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
@@ -274,8 +276,29 @@ dialog::backdrop{background:rgba(0,0,0,.7)}
       <div class="grid contact">
         <div class="box"><h3>Discord</h3><p>Chat with us on our server.</p>
           <a class="btn" href="https://discord.gg/RSU6FK4GRK" target="_blank" rel="noopener noreferrer">Join Discord</a></div>
-        <div class="box"><h3>Email</h3><p><a href="mailto:mr17171717171717@gmail.com">mr17171717171717@gmail.com</a></p></div>
+        <div class="box"><h3>Email</h3><p><a href="mailto:aneequrrehman161@gmail.com">aneequrrehman161@gmail.com</a></p></div>
         <div class="box"><h3>Staff hours</h3><p>24/7</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="owners" class="sec alt">
+    <div class="wrap">
+      <h2>Server Owners</h2>
+      <p class="lead">The co-owners behind Drizzle Craft.</p>
+      <div class="grid owners">
+        <article class="box owner">
+          <div class="avatar" style="background:#c9a227" aria-hidden="true">N</div>
+          <span class="role-tag">CO-OWNER</span>
+          <h3>noobpro112013</h3>
+          <p>Co-Owner: noobpro112013</p>
+        </article>
+        <article class="box owner">
+          <div class="avatar" style="background:#8e44ad" aria-hidden="true">A</div>
+          <span class="role-tag">CO-OWNER</span>
+          <h3>AneeqTheGeek69</h3>
+          <p>Co-Owner: AneeqTheGeek69</p>
+        </article>
       </div>
     </div>
   </section>
@@ -283,6 +306,7 @@ dialog::backdrop{background:rgba(0,0,0,.7)}
 
 <footer class="foot">
   <b>Drizzle Craft</b>
+  <span>Co-Owner: noobpro112013 &bull; Co-Owner: AneeqTheGeek69</span>
   <span>Not affiliated with Mojang or Microsoft.</span>
   <button class="link" id="adminLink" type="button">Admin login</button>
 </footer>
@@ -315,8 +339,7 @@ window.DC_CONTENT = {
   world: [
     { label: "Minecraft version", value: "26.3" },
     { label: "Server software",   value: "Paper" },
-    { label: "Difficulty",        value: "Easy" },
-    { label: "World seed",        value: "4778174833863121280" }
+    { label: "Difficulty",        value: "Easy" }
   ],
   
   rules: [
@@ -391,7 +414,6 @@ window.DC_CONTENT = {
 
   /* ---------- default content (used until the database has its own) ---------- */
   var content = window.DC_CONTENT || {};
-  var basesBox = el("article", { class: "box wide" });
   var FALLBACK = {
     rules: (content.rules || []).map(function (r, i) { return { title: r.title, body: r.text, sort_order: i + 1 }; }),
     world_info: (content.world || []).map(function (w, i) { return { label: w.label, value: w.value, sort_order: i + 1 }; }),
@@ -449,8 +471,8 @@ window.DC_CONTENT = {
   checkStatus();
   setInterval(checkStatus, 60000);
 
-  /* ---------- data: clips, news, bases ---------- */
-  var data = { clips: [], news: [], bases: [], rules: FALLBACK.rules, world_info: FALLBACK.world_info, players: FALLBACK.players, screenshots: [] };
+  /* ---------- data: clips, news ---------- */
+  var data = { clips: [], news: [], rules: FALLBACK.rules, world_info: FALLBACK.world_info, players: FALLBACK.players, screenshots: [] };
   var editors = {};
 
   function adminDelete(table, row, label) {
@@ -504,19 +526,6 @@ window.DC_CONTENT = {
       if (n.body) kids.push(el("p", { text: n.body }));
       if (isAdmin) kids.push(adminDelete("news", n, n.title));
       list.appendChild(el("article", { class: "box" }, kids));
-    });
-  }
-
-  function renderBases() {
-    basesBox.textContent = "";
-    basesBox.appendChild(el("h3", { text: "Bases and coordinates" }));
-    if (!data.bases.length) { basesBox.appendChild(el("p", { class: "soon", text: "Coming soon" })); return; }
-    data.bases.forEach(function (b) {
-      var info = el("div", {}, [el("strong", { text: b.name }), el("code", { text: b.coordinates })]);
-      if (b.description) info.appendChild(el("p", { text: b.description }));
-      var row = el("div", { class: "base" }, [info]);
-      if (isAdmin) row.appendChild(adminDelete("bases", b, b.name));
-      basesBox.appendChild(row);
     });
   }
 
@@ -584,15 +593,16 @@ window.DC_CONTENT = {
         el("p", { class: has ? "" : "soon", text: has ? w.value : "Coming soon" })
       ]));
     });
-    g.appendChild(basesBox);
   }
 
-  var renderers = { clips: renderClips, news: renderNews, bases: renderBases, rules: renderRules, world_info: renderWorld, players: renderPlayers, screenshots: renderGallery };
+  var renderers = { clips: renderClips, news: renderNews, rules: renderRules, world_info: renderWorld, players: renderPlayers, screenshots: renderGallery };
   var TABLE = { players: "player_stats" };
-  var ORDER = { clips: ["created_at", false], news: ["created_at", false], bases: ["created_at", false], rules: ["sort_order", true], world_info: ["sort_order", true], players: ["created_at", true], screenshots: ["created_at", false] };
-  function renderAll() { renderClips(); renderNews(); renderBases(); renderRules(); renderWorld(); renderPlayers(); renderGallery(); }
+  var ORDER = { clips: ["created_at", false], news: ["created_at", false], rules: ["sort_order", true], world_info: ["sort_order", true], players: ["created_at", true], screenshots: ["created_at", false] };
+  function renderAll() { renderClips(); renderNews(); renderRules(); renderWorld(); renderPlayers(); renderGallery(); }
   function load(table) {
     function done(rows) {
+      // Hide the old "World seed" row if it is still saved in the database
+      if (table === "world_info") rows = rows.filter(function (w) { return !/seed/i.test(w.label || ""); });
       data[table] = rows;
       renderers[table]();
       if (isAdmin && editors[table]) editors[table]();
@@ -602,8 +612,8 @@ window.DC_CONTENT = {
       done(r.error ? (FALLBACK[table] || []) : r.data);
     });
   }
-  function loadAll() { ["clips", "news", "bases", "rules", "world_info", "players", "screenshots"].forEach(load); }
-  renderWorld(); renderRules(); renderBases(); renderPlayers(); renderGallery();
+  function loadAll() { ["clips", "news", "rules", "world_info", "players", "screenshots"].forEach(load); }
+  renderWorld(); renderRules(); renderPlayers(); renderGallery();
 
   /* ---------- admin panel (built only after a verified admin login) ---------- */
   function buildPanel() {
@@ -664,13 +674,6 @@ window.DC_CONTENT = {
     var newsForm = make([field("Title", nTitle), field("Text (optional)", nText)], "Post news", function () {
       return insert("news", { title: nTitle.value.trim(), body: nText.value.trim() || null });
     }, "News posted.", "news");
-
-    var bName = el("input", { maxlength: "80", required: "" });
-    var bCoords = el("input", { maxlength: "120", required: "", placeholder: "X 120, Y 64, Z -300" });
-    var bDesc = el("textarea", { maxlength: "500" });
-    var baseForm = make([field("Base name", bName), field("Coordinates", bCoords), field("Description (optional)", bDesc)], "Add base", function () {
-      return insert("bases", { name: bName.value.trim(), coordinates: bCoords.value.trim(), description: bDesc.value.trim() || null });
-    }, "Base added.", "bases");
 
     function editor(table, cfg) {
       var box = el("div", { class: "stack editor" });
@@ -809,7 +812,7 @@ window.DC_CONTENT = {
     editors.players = playersEd.refresh;
     playersEd.refresh();
 
-    var tabs = [["+ Clip", clipForm], ["+ News", newsForm], ["+ Base", baseForm], ["+ Photo", shotForm], ["Rules", rulesEd], ["World", worldEd], ["Players", playersEd]];
+    var tabs = [["+ Clip", clipForm], ["+ News", newsForm], ["+ Photo", shotForm], ["Rules", rulesEd], ["World", worldEd], ["Players", playersEd]];
     var bar = el("div", { class: "tabs" });
     tabs.forEach(function (t, i) {
       var b = el("button", { class: "tab" + (i ? "" : " on"), type: "button", text: t[0] });
@@ -828,7 +831,7 @@ window.DC_CONTENT = {
     mount.appendChild(el("section", { class: "sec admin-sec" }, [el("div", { class: "wrap" }, [
       el("div", { class: "box admin" }, [
         el("div", { class: "admin-top" }, [el("h3", { text: "Admin panel" }), out]),
-        bar, clipForm, newsForm, baseForm, shotForm, rulesEd, worldEd, playersEd, msg
+        bar, clipForm, newsForm, shotForm, rulesEd, worldEd, playersEd, msg
       ])
     ])]));
   }
