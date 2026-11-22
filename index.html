@@ -183,15 +183,22 @@ dialog::backdrop{background:rgba(0,0,0,.7)}
 
 /* viewer (videos + pictures) */
 .fsbtn{margin:2px 10px 10px 0}
-dialog.lb{width:100vw;height:100vh;height:100dvh;max-width:none;max-height:none;margin:0;padding:0;border:0;background:rgba(0,0,0,.95);color:#fff}
+dialog.lb{width:100vw;height:100vh;height:100dvh;max-width:none;max-height:none;margin:0;padding:0;border:0;background:#000;color:#fff;overflow:hidden}
 dialog.lb[open]{display:flex;flex-direction:column}
 .lb-bar{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;padding:12px;background:#141417;border-bottom:4px solid #000}
-.lb-stage{flex:1;min-height:0;display:grid;place-items:center;padding:12px}
+.lb-stage{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;padding:12px}
 .lb-stage img{max-width:100%;max-height:100%;object-fit:contain;display:block}
-.lb-stage video{max-width:100%;max-height:100%;display:block;background:#000}
-.lb-stage iframe{width:min(100%,calc((100vh - 150px) * 16 / 9));aspect-ratio:16/9;border:0;background:#000;display:block}
 .lb-cap{color:#fff;text-align:center;padding:8px 12px 14px;margin:0;font-size:22px}
 .lb-cap:empty{display:none}
+.lb-x{position:absolute;top:10px;right:10px;z-index:5;display:none}
+/* video mode: only the video, filling the page */
+dialog.lb.vid .lb-bar,dialog.lb.vid .lb-cap{display:none}
+dialog.lb.vid .lb-stage{padding:0}
+dialog.lb.vid .lb-x{display:block}
+.lb-stage video{width:100%;height:100%;object-fit:contain;background:#000;display:block}
+.lb-stage iframe{width:100%;height:100%;border:0;background:#000;display:block}
+.lb-msg{text-align:center;padding:24px;max-width:560px}
+.lb-msg p{color:#fff;margin:0 0 16px}
 </style>
 </head>
 <body>
@@ -334,6 +341,7 @@ dialog.lb[open]{display:flex;flex-direction:column}
 </dialog>
 
 <dialog id="lightbox" class="lb" aria-label="Viewer">
+  <button class="btn small red lb-x" id="lbX" type="button">Close</button>
   <div class="lb-bar">
     <button class="btn small gray" id="lbPrev" type="button">Prev</button>
     <button class="btn small gray" id="lbNext" type="button">Next</button>
@@ -508,6 +516,7 @@ window.DC_CONTENT = {
 
   function showShot(i) {
     if (!shots.length) return;
+    lb.classList.remove("vid");
     shotIdx = (i + shots.length) % shots.length;
     var s = shots[shotIdx];
     stage.textContent = "";
@@ -523,24 +532,37 @@ window.DC_CONTENT = {
     if (!url) return;
     var node;
     var yt = url.match(/(?:youtube\.com\/(?:watch\?v=|shorts\/|embed\/)|youtu\.be\/)([\w-]{11})/);
+    stage.textContent = "";
     if (yt) {
       node = el("iframe", {
         src: "https://www.youtube-nocookie.com/embed/" + yt[1] + "?autoplay=1", title: clip.title,
         allow: "accelerometer; autoplay; encrypted-media; picture-in-picture; fullscreen", allowfullscreen: ""
       });
     } else {
-      node = el("video", { src: url, controls: "", autoplay: "", playsinline: "" });
+      node = el("video", { src: url, controls: "", autoplay: "", playsinline: "", preload: "auto" });
+      node.addEventListener("error", function () {
+        stage.textContent = "";
+        stage.appendChild(el("div", { class: "lb-msg" }, [
+          el("p", { text: "This video can't be played in the browser. The file format is probably not supported. Re-save it as MP4 (H.264) and upload it again." }),
+          el("a", { class: "btn small", href: url, target: "_blank", rel: "noopener noreferrer", text: "Open video file" })
+        ]));
+      });
     }
-    stage.textContent = "";
     stage.appendChild(node);
     lbCap.textContent = clip.title || "";
     lbPrev.hidden = true; lbNext.hidden = true;
+    lb.classList.add("vid");
     openViewer();
+    if (node.tagName === "VIDEO") {
+      var p = node.play();
+      if (p && p.catch) p.catch(function () {});
+    }
   }
 
   lbPrev.addEventListener("click", function () { showShot(shotIdx - 1); });
   lbNext.addEventListener("click", function () { showShot(shotIdx + 1); });
   $("lbClose").addEventListener("click", function () { lb.close(); });
+  $("lbX").addEventListener("click", function () { lb.close(); });
   $("lbFs").addEventListener("click", function () {
     var v = stage.querySelector("video");
     goFull(v || stage.querySelector("iframe") || lb);
@@ -550,6 +572,7 @@ window.DC_CONTENT = {
   lb.addEventListener("close", function () {
     stage.textContent = ""; // also stops any playing video
     lbCap.textContent = "";
+    lb.classList.remove("vid");
     if (document.fullscreenElement && document.exitFullscreen) document.exitFullscreen();
   });
   document.addEventListener("keydown", function (e) {
@@ -751,7 +774,7 @@ window.DC_CONTENT = {
     var cDesc = el("textarea", { maxlength: "500" });
     var clipForm = make([
       field("Title", cTitle), field("Video link", cLink), field("or upload a video file", cFile),
-      el("p", { class: "hint", text: "Use a link or a file (max 50 MB)." }), field("Description (optional)", cDesc)
+      el("p", { class: "hint", text: "Use a link or a file (max 50 MB). MP4 (H.264) works best." }), field("Description (optional)", cDesc)
     ], "Add clip", function () {
       var f = cFile.files[0], url = safeUrl(cLink.value.trim());
       if (!f && !url) throw new Error("Add a valid link or choose a file.");
