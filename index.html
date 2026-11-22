@@ -176,10 +176,22 @@ dialog::backdrop{background:rgba(0,0,0,.7)}
 .ps span{font-size:18px;color:var(--muted)}
 .ps.hp b{color:#e84118}
 .gallery{grid-template-columns:repeat(auto-fill,minmax(250px,1fr))}
-.shot{display:block;aspect-ratio:4/3;background:#000;border-bottom:4px solid var(--line)}
+.shot{display:block;aspect-ratio:4/3;background:#000;border-bottom:4px solid var(--line);cursor:zoom-in}
 .shot img{width:100%;height:100%;object-fit:cover;display:block}
 .nums{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
 .nums input{max-width:none!important}
+
+/* viewer (videos + pictures) */
+.fsbtn{margin:2px 10px 10px 0}
+dialog.lb{width:100vw;height:100vh;height:100dvh;max-width:none;max-height:none;margin:0;padding:0;border:0;background:rgba(0,0,0,.95);color:#fff}
+dialog.lb[open]{display:flex;flex-direction:column}
+.lb-bar{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;padding:12px;background:#141417;border-bottom:4px solid #000}
+.lb-stage{flex:1;min-height:0;display:grid;place-items:center;padding:12px}
+.lb-stage img{max-width:100%;max-height:100%;object-fit:contain;display:block}
+.lb-stage video{max-width:100%;max-height:100%;display:block;background:#000}
+.lb-stage iframe{width:min(100%,calc((100vh - 150px) * 16 / 9));aspect-ratio:16/9;border:0;background:#000;display:block}
+.lb-cap{color:#fff;text-align:center;padding:8px 12px 14px;margin:0;font-size:22px}
+.lb-cap:empty{display:none}
 </style>
 </head>
 <body>
@@ -258,7 +270,7 @@ dialog::backdrop{background:rgba(0,0,0,.7)}
   <section id="gallery" class="sec">
     <div class="wrap">
       <h2>Gallery</h2>
-      <p class="lead">Screenshots of our builds and best moments.</p>
+      <p class="lead">Screenshots of our builds and best moments. Tap a picture to view it full size.</p>
       <div class="grid gallery" id="galleryGrid"></div>
     </div>
   </section>
@@ -319,6 +331,17 @@ dialog::backdrop{background:rgba(0,0,0,.7)}
     <p class="err" id="lErr" role="alert"></p>
     <div class="row"><button class="btn" type="submit">Log in</button><button class="btn gray" type="button" id="lCancel">Cancel</button></div>
   </form>
+</dialog>
+
+<dialog id="lightbox" class="lb" aria-label="Viewer">
+  <div class="lb-bar">
+    <button class="btn small gray" id="lbPrev" type="button">Prev</button>
+    <button class="btn small gray" id="lbNext" type="button">Next</button>
+    <button class="btn small" id="lbFs" type="button">Fullscreen</button>
+    <button class="btn small red" id="lbClose" type="button">Close</button>
+  </div>
+  <div class="lb-stage" id="lbStage"></div>
+  <p class="lb-cap" id="lbCap"></p>
 </dialog>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
@@ -471,6 +494,70 @@ window.DC_CONTENT = {
   checkStatus();
   setInterval(checkStatus, 60000);
 
+  /* ---------- viewer (pictures + videos) ---------- */
+  var lb = $("lightbox"), stage = $("lbStage"), lbCap = $("lbCap");
+  var lbPrev = $("lbPrev"), lbNext = $("lbNext");
+  var shots = [], shotIdx = 0;
+
+  function goFull(node) {
+    var f = node.requestFullscreen || node.webkitRequestFullscreen || node.msRequestFullscreen;
+    if (f) { try { f.call(node); } catch (e) {} }
+    else if (node.webkitEnterFullscreen) { node.webkitEnterFullscreen(); }
+  }
+  function openViewer() { if (!lb.open) lb.showModal(); }
+
+  function showShot(i) {
+    if (!shots.length) return;
+    shotIdx = (i + shots.length) % shots.length;
+    var s = shots[shotIdx];
+    stage.textContent = "";
+    stage.appendChild(el("img", { src: s.url, alt: s.title || "Drizzle Craft screenshot" }));
+    lbCap.textContent = s.title || "";
+    var many = shots.length > 1;
+    lbPrev.hidden = !many; lbNext.hidden = !many;
+  }
+  function openShot(i) { showShot(i); openViewer(); }
+
+  function openClip(clip) {
+    var url = safeUrl(clip.video_url);
+    if (!url) return;
+    var node;
+    var yt = url.match(/(?:youtube\.com\/(?:watch\?v=|shorts\/|embed\/)|youtu\.be\/)([\w-]{11})/);
+    if (yt) {
+      node = el("iframe", {
+        src: "https://www.youtube-nocookie.com/embed/" + yt[1] + "?autoplay=1", title: clip.title,
+        allow: "accelerometer; autoplay; encrypted-media; picture-in-picture; fullscreen", allowfullscreen: ""
+      });
+    } else {
+      node = el("video", { src: url, controls: "", autoplay: "", playsinline: "" });
+    }
+    stage.textContent = "";
+    stage.appendChild(node);
+    lbCap.textContent = clip.title || "";
+    lbPrev.hidden = true; lbNext.hidden = true;
+    openViewer();
+  }
+
+  lbPrev.addEventListener("click", function () { showShot(shotIdx - 1); });
+  lbNext.addEventListener("click", function () { showShot(shotIdx + 1); });
+  $("lbClose").addEventListener("click", function () { lb.close(); });
+  $("lbFs").addEventListener("click", function () {
+    var v = stage.querySelector("video");
+    goFull(v || stage.querySelector("iframe") || lb);
+  });
+  stage.addEventListener("click", function (e) { if (e.target === stage) lb.close(); });
+  lb.addEventListener("click", function (e) { if (e.target === lb) lb.close(); });
+  lb.addEventListener("close", function () {
+    stage.textContent = ""; // also stops any playing video
+    lbCap.textContent = "";
+    if (document.fullscreenElement && document.exitFullscreen) document.exitFullscreen();
+  });
+  document.addEventListener("keydown", function (e) {
+    if (!lb.open || lbPrev.hidden) return;
+    if (e.key === "ArrowLeft") showShot(shotIdx - 1);
+    if (e.key === "ArrowRight") showShot(shotIdx + 1);
+  });
+
   /* ---------- data: clips, news ---------- */
   var data = { clips: [], news: [], rules: FALLBACK.rules, world_info: FALLBACK.world_info, players: FALLBACK.players, screenshots: [] };
   var editors = {};
@@ -495,7 +582,7 @@ window.DC_CONTENT = {
     if (yt) {
       return el("iframe", {
         src: "https://www.youtube-nocookie.com/embed/" + yt[1], title: clip.title, loading: "lazy",
-        allow: "accelerometer; encrypted-media; picture-in-picture", allowfullscreen: ""
+        allow: "accelerometer; encrypted-media; picture-in-picture; fullscreen", allowfullscreen: ""
       });
     }
     if (clip.storage_path || /\.(mp4|webm|ogg|mov)(\?|$)/i.test(url)) {
@@ -509,10 +596,19 @@ window.DC_CONTENT = {
     grid.textContent = "";
     if (!data.clips.length) { grid.appendChild(el("p", { class: "empty", text: "No clips available." })); return; }
     data.clips.forEach(function (c) {
+      var media = embedFor(c);
       var body = el("div", { class: "cbody" }, [el("h3", { text: c.title })]);
       if (c.description) body.appendChild(el("p", { text: c.description }));
+      if (media.tagName === "VIDEO" || media.tagName === "IFRAME") {
+        var open = el("button", { class: "btn small fsbtn", type: "button", text: "Expand" });
+        open.addEventListener("click", function () {
+          if (media.tagName === "VIDEO") media.pause();
+          openClip(c);
+        });
+        body.appendChild(open);
+      }
       if (isAdmin) body.appendChild(adminDelete("clips", c, c.title));
-      grid.appendChild(el("article", { class: "box clip" }, [el("div", { class: "media" }, [embedFor(c)]), body]));
+      grid.appendChild(el("article", { class: "box clip" }, [el("div", { class: "media" }, [media]), body]));
     });
   }
 
@@ -557,13 +653,17 @@ window.DC_CONTENT = {
   function renderGallery() {
     var g = $("galleryGrid");
     g.textContent = "";
+    shots = [];
     if (!data.screenshots.length) { g.appendChild(el("p", { class: "empty", text: "No screenshots yet." })); return; }
     data.screenshots.forEach(function (s) {
       var url = safeUrl(s.image_url);
       if (!url) return;
-      var link = el("a", { class: "shot", href: url, target: "_blank", rel: "noopener noreferrer" }, [
+      var idx = shots.length;
+      shots.push({ url: url, title: s.title || "" });
+      var link = el("a", { class: "shot", href: url, target: "_blank", rel: "noopener noreferrer", "aria-label": "View " + (s.title || "screenshot") + " full size" }, [
         el("img", { src: url, alt: s.title || "Drizzle Craft screenshot", loading: "lazy" })
       ]);
+      link.addEventListener("click", function (e) { e.preventDefault(); openShot(idx); });
       var kids = [link], body = el("div", { class: "cbody" });
       if (s.title) body.appendChild(el("h3", { text: s.title }));
       if (isAdmin) body.appendChild(adminDelete("screenshots", s, s.title || "this screenshot"));
